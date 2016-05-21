@@ -1,0 +1,12 @@
+<a href="#/">Logout</a>
+<hr>
+<div ng-controller="questionsController as QC">
+	<h1>{{QC.currQuestion[0].question}}</h1>
+	<h1>{{QC.currQuestion[0].description}}</h1>
+	<hr>
+	<p>Post your answer:</p>
+	<textarea ng-model="QC.newAnswer.answer"></textarea>
+	<textarea ng-model="QC.newAnswer.details"></textarea>
+	<button>Cancel</button>
+	<button ng-click="QC.addAnswer()">Submit</button>
+</div>

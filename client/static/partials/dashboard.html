@@ -1,0 +1,24 @@
+<a href="#/">Logout</a>
+<hr>
+<div ng-controller="questionsController as QC">
+	<h3>Welcome {{QC.currUser.name}}</h3>
+	<hr>
+	<a href="#/new_question">Add a question</a>
+	<hr>
+	<table>
+		<thead>
+			<tr>
+				<th>Question</th>
+				<th>Answers</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="question in QC.questions">
+				<td>{{question.question}}</td>
+				<td>{{question.answers.length}}</td>
+				<td><a href="#/questi/{{question._id}}">Show</a> <a href="#/answer/{{question._id}}">Answers</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

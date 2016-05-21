@@ -1,0 +1,206 @@
+<!DOCTYPE>
+<html>
+<head>
+	<title>Belt Exam</title>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.js"></script>
+	<script>
+		var myApp = angular.module("myApp", ["ngRoute"])
+
+		myApp.config(function($routeProvider) {
+			$routeProvider
+			.when("/", {
+				templateUrl: "static/partials/login.html"
+			})
+			.when("/dashboard", {
+				templateUrl: "static/partials/dashboard.html"
+			})
+			.when("/new_question", {
+				templateUrl: "static/partials/new_question.html"
+			})
+			.when("/questi/:id", {
+				templateUrl: "static/partials/question.html"
+			})
+			.when("/answer/:id", {
+				templateUrl: "static/partials/answer.html"				
+			})
+			.otherwise({
+				redirectTo: "/"
+			})
+		})
+
+		myApp.factory("userFactory", function($http) {
+			console.log("userFactory working!")
+			var factory = {}
+
+			factory.getUsers = function(callback) {
+				$http.get("./users").success(function(data) {
+					factory.users = data
+					callback(factory.users)
+				})
+			}
+
+			factory.addUser = function(info, callback) {
+				$http.post("./users", info).success(function(data) {
+					factory.users = data
+					callback()
+				})
+			}
+
+			factory.currentUser = function(callback) {
+				$http.get("./currentUser").success(function(data) {
+					factory.currUser = data
+					callback(factory.currUser)
+				})
+			}
+			return factory
+		})
+
+		myApp.factory("questionFactory", function($http) {
+			console.log("questionFactory working!")
+			var factory = {}
+
+			factory.getQuestions = function(callback) {
+				$http.get("./questions").success(function(data) {
+					factory.questions = data
+					callback(factory.questions)
+				})
+			}
+
+			factory.addQuestion = function(info, callback) {
+				console.log("adding question in factory")
+				$http.post("./questions", info).success(function(data) {
+					factory.questions = data
+					callback()
+				})
+			}
+
+			factory.getTheseAnswers = function(info, callback) {
+				$http.get("./theseAnswers/"+info).success(function(data) {
+					factory.theseAnswers = data
+					callback(factory.theseAnswers)
+				})
+			}
+
+			factory.targetQuestion = function(info, callback) {
+				$http.get("./questions/"+info).success(function(data) {
+					factory.currQuestion = data
+					callback(factory.currQuestion)
+				})
+			}
+
+			factory.addAnswer = function(info, callback) {
+				console.log(info)
+				$http.post("./answers/"+info.question_id, info).success(function(data) {
+					factory.questions = data
+					callback()
+				})
+			}
+
+			return factory
+		})
+
+		myApp.controller("usersController", function (userFactory, $location) {
+			console.log("usersController loaded")
+			var self = this
+
+			var getUsers = function() {
+				userFactory.getUsers(function(data) {
+					self.users = data
+				})
+			}
+			getUsers()
+
+			var currentUser = function() {
+				userFactory.currentUser(function(data) {
+					self.currUser = data
+				})
+			}
+
+			currentUser()
+			this.addUser = function() {
+				userFactory.addUser(this.newUser, function(data) {
+					getUsers()
+				})
+			this.newUser = {}
+			$location.url("/dashboard")
+			}
+		})
+
+		myApp.controller("questionsController", function (userFactory, questionFactory, $location) {
+			console.log("questionsController loaded")
+			var self = this
+
+			var getTheseAnswers = function(questionID) {
+				questionFactory.getTheseAnswers(questionID, function(data) {
+					self.theseAnswers = data
+				})
+			}
+
+			getTheseAnswers()
+
+			var getUsers = function() {
+				userFactory.getUsers(function(data) {
+					self.users = data
+				})
+			}
+			getUsers()
+
+			var currentUser = function() {
+				userFactory.currentUser(function(data) {
+					self.currUser = data
+				})
+			}
+
+			currentUser()
+
+			var getQuestions = function() {
+				questionFactory.getQuestions(function(data) {
+					self.questions = data
+				})
+			}
+
+			var targetQuestion = function(questionID) {
+				questionFactory.targetQuestion(questionID, function(data) {
+					self.currQuestion = data
+					console.log(currQuestion)
+				})
+			}
+
+			var _id = $location.$$path.slice(8)
+			targetQuestion(_id)
+			getTheseAnswers(_id)
+
+			getQuestions()
+
+			this.addQuestion = function() {
+				this.newQuestion.posted_by = self.currUser._id
+				questionFactory.addQuestion(this.newQuestion, function(data) {
+					getQuestions()
+				})
+			this.newQuestion = {}
+			$location.url("/dashboard")
+			}	
+
+			this.addAnswer = function() {
+				this.newAnswer.question_id = self.currQuestion[0]._id
+				this.newAnswer.posted_by = self.currUser
+				console.log(this.newAnswer)
+				questionFactory.addAnswer(this.newAnswer, function(data) {
+				})
+			this.newAnswer = {}
+			getQuestions()
+			$location.url("/dashboard")
+			}
+
+		})
+
+
+	</script>
+</head>
+<body ng-app="myApp">
+	<h1>Questions and Answers</h1>
+	<hr>
+	<div ng-view=""></div>
+</body>
+</html>

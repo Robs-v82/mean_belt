@@ -1,0 +1,11 @@
+<a href="#/">Logout</a>
+<a href="#/dashboard">Dashboard</a>
+<hr>
+<div ng-controller="questionsController as QC">
+	<h1>{{QC.currQuestion[0].question}}</h1>
+	<h3>{{QC.currQuestion[0].description}}</h3>
+	<hr>
+	<ul>
+		<li ng-repeat="answer in QC.theseAnswers">{{answer.answer}}</li>
+	</ul>
+</div>
